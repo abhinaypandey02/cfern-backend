@@ -1,12 +1,52 @@
 const { PDFDocument } = require('pdf-lib');
 const { readFile } = require('fs/promises');
-
+ const on428 = async ({line26000:amount}) => {
+	try {
+		const pdfDoc = await PDFDocument.load(await readFile('on428-unlocked.pdf'), {
+			ignoreEncryption: true,
+		});
+		const form = pdfDoc.getForm();
+		function setTextField(fieldName,amount){
+			form.getTextField(fieldName).setText(amount.toFixed(2).toString()+'   ');
+		}	
+		setTextField("form1[0].Page1[0].Page1[0].Line1[0].Amount[0]", amount)		
+		if(amount<=45142){
+			setTextField("form1[0].Page1[0].Page1[0].Chart[0].Column1[0].Line2[0].Amount[0]", amount)		
+			setTextField("form1[0].Page1[0].Page1[0].Chart[0].Column1[0].Line4[0].Amount[0]", amount)		
+			setTextField("form1[0].Page1[0].Page1[0].Chart[0].Column1[0].Line6[0].Amount[0]", amount*5.05/100)		
+			setTextField("form1[0].Page1[0].Page1[0].Chart[0].Column1[0].Line8[0].Amount[0]", amount*5.05/100)
+		} else if(amount>45142&&amount<=90287){
+			setTextField("form1[0].Page1[0].Page1[0].Chart[0].Column2[0].Line2[0].Amount[0]", amount)		
+			setTextField("form1[0].Page1[0].Page1[0].Chart[0].Column2[0].Line4[0].Amount[0]", amount-45142)		
+			setTextField("form1[0].Page1[0].Page1[0].Chart[0].Column2[0].Line6[0].Amount[0]", (amount-45142)*9.15/100)		
+			setTextField("form1[0].Page1[0].Page1[0].Chart[0].Column2[0].Line8[0].Amount[0]", (amount-45142)*9.15/100+2279.67)
+		}else if(amount>90287&&amount<=150000){
+			setTextField("form1[0].Page1[0].Page1[0].Chart[0].Column4[0].Line2[0].Amount[0]", amount)		
+			setTextField("form1[0].Page1[0].Page1[0].Chart[0].Column4[0].Line4[0].Amount[0]", amount-90287)		
+			setTextField("form1[0].Page1[0].Page1[0].Chart[0].Column4[0].Line6[0].Amount[0]", (amount-90287)*11.16/100)		
+			setTextField("form1[0].Page1[0].Page1[0].Chart[0].Column4[0].Line8[0].Amount[0]", (amount-90287)*11.16/100+6410.44)
+		}else if(amount>150000&&amount<=220000){
+			setTextField("form1[0].Page1[0].Page1[0].Chart[0].Column4[0].Line2[0].Amount[0]", amount)		
+			setTextField("form1[0].Page1[0].Page1[0].Chart[0].Column4[0].Line4[0].Amount[0]", amount-150000)		
+			setTextField("form1[0].Page1[0].Page1[0].Chart[0].Column4[0].Line6[0].Amount[0]", (amount-150000)*12.16/100)		
+			setTextField("form1[0].Page1[0].Page1[0].Chart[0].Column4[0].Line8[0].Amount[0]", (amount-150000)*12.16/100+13074.41)
+		}else {
+			setTextField("form1[0].Page1[0].Page1[0].Chart[0].Column5[0].Line2[0].Amount[0]", amount)		
+			setTextField("form1[0].Page1[0].Page1[0].Chart[0].Column5[0].Line4[0].Amount[0]", amount-220000)		
+			setTextField("form1[0].Page1[0].Page1[0].Chart[0].Column5[0].Line6[0].Amount[0]", (amount-220000)*13.16/100)		
+			setTextField("form1[0].Page1[0].Page1[0].Chart[0].Column5[0].Line8[0].Amount[0]", (amount-220000)*13.16/100+21586.41)
+		}
+		return(await pdfDoc.save());
+	} catch (err) {
+		console.log(err);
+	}
+};
 const createPdf = async (input, body, res) => {
 	try {
 		const pdfDoc = await PDFDocument.load(await readFile(input), {
 			ignoreEncryption: true,
 		});
-
+		let line26000=0;
 		let {
 			// * Step 1
 			// identification
@@ -86,7 +126,7 @@ const createPdf = async (input, body, res) => {
 			box85,
 		} = body;
 
-		// Modify doc, fill out the form...
+		// Modify doc, fill out the ..
 		const fieldNames = pdfDoc.getForm().getFields();
 
 		fieldNames.forEach((field, i) => {
@@ -335,6 +375,7 @@ const createPdf = async (input, body, res) => {
 				field.setText('0');
 			}
 			let taxable = totalNet - sum56to64;
+			if(!isNaN(taxable))line26000=taxable;
 			if (taxable < 0) {
 				taxable = 0;
 			}
@@ -481,14 +522,14 @@ const createPdf = async (input, body, res) => {
 				field.setText(box85);
 			}
 		});
-
+		const on428Form=await on428({line26000})
 		const pdfBytes = await pdfDoc.save();
-		res.send(pdfBytes);
+		res.send([pdfBytes,on428Form]);
 	} catch (err) {
 		console.log(err);
 	}
 };
 
 module.exports = {
-	createPdf,
+	createPdf
 };
