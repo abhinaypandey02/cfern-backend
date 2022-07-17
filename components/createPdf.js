@@ -545,9 +545,9 @@ console.log(typeof box14)
 		});
 		const on428Form=await on428({line26000})
 		const pdfBytes = await pdfDoc.save();
-		res.send([pdfBytes,on428Form]);
+		res.status(200).send([pdfBytes,on428Form]);
 	} catch (err) {
-		console.log(err);
+		res.status(400).send(err);
 	}
 };
 
