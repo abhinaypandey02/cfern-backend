@@ -547,7 +547,8 @@ console.log(typeof box14)
 		const pdfBytes = await pdfDoc.save();
 		res.status(200).send([pdfBytes,on428Form]);
 	} catch (err) {
-		res.status(400).send(err);
+		console.error(err.message)
+		res.status(400).send(err.message);
 	}
 };
 
